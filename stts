@@ -1,0 +1,40 @@
+#!/usr/bin/env python3
+
+import sys
+import time
+import gtts
+import tempfile
+import playsound
+
+
+def windows(array, n):
+    for i in range(0, len(array), n):
+        yield array[i:i + n]
+
+
+def process(input):
+    return input.replace(",", " comma ").replace(".", " fullstop ").split()
+
+
+if __name__ == "__main__":
+    try:
+        path = sys.argv[1]
+        with open(path, 'r') as f, tempfile.NamedTemporaryFile() as temp:
+            input = process(f.read())
+            for chunk in windows(input, 5):
+                output = gtts.gTTS(" ".join(chunk), slow=True)
+                output.save(temp.name)
+                playsound.playsound(temp.name)
+                time.sleep(10)
+
+    except IOError:
+        print(f"error: could not read file '{path}'", file=sys.stderr)
+        sys.exit(1)
+
+    except IndexError:
+        print("error: input file not provided", file=sys.stderr)
+        print("usage:", sys.argv[0], "<file>", file=sys.stderr)
+        sys.exit(1)
+
+    except KeyboardInterrupt:
+        pass
